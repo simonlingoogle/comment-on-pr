@@ -77,6 +77,7 @@ def main():
 
     # load template
     template = load_template(get_actions_input('filename'))
+    duplicate_check = get_actions_input('duplicate_check')
 
     # build a comment
     pr_info = {
@@ -86,10 +87,11 @@ def main():
     new_comment = template.format(**pr_info)
 
     # check if this pull request has a duplicated comment
-    old_comments = [c.body for c in pr.get_issue_comments()]
-    if new_comment in old_comments:
-        print('This pull request already a duplicated comment.')
-        exit(0)
+    if duplicate_check:
+        for c in pr.get_issue_comments():
+            if duplicate_check in c.body:
+                print('Deleting duplicated comment: %s' % c.id)
+                c.delete()
 
     # add the comment
     pr.create_issue_comment(new_comment)
